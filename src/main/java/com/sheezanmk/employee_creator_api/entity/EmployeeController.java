@@ -56,9 +56,10 @@ public class EmployeeController {
 
     @PutMapping("/{id}")
     public EmployeeResponseDto updateEmployee(@PathVariable Long id, @RequestBody @Valid UpdateEmployeeDto body) {
-        Employee updated = EmployeeMapper.toEntity(body);
-        Employee saved = employeeService.updateEmployee(id, updated);
-        return EmployeeMapper.toDto(saved);
+        {
+            Employee saved = employeeService.updateEmployee(id, body);
+            return EmployeeMapper.toDto(saved);
+        }
 
     }
 

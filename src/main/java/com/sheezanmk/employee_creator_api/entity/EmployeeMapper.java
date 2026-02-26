@@ -52,7 +52,6 @@ public class EmployeeMapper {
         employee.setEmail(dto.getEmail());
         employee.setMobileNumber(dto.getMobileNumber());
         employee.setAddress(dto.getAddress());
-
         employee.setContractType(dto.getContractType());
         employee.setStartDate(dto.getStartDate());
         employee.setFinishDate(dto.getFinishDate());
@@ -60,26 +59,6 @@ public class EmployeeMapper {
         employee.setWorkType(dto.getWorkType());
         employee.setHoursPerWeek(dto.getHoursPerWeek());
 
-    }
-
-    public static Employee toEntity(UpdateEmployeeDto dto) {
-        Employee employee = new Employee();
-
-        employee.setFirstName(dto.getFirstName());
-        // employee.setMiddleName(dto.getMiddleName());
-        employee.setLastName(dto.getLastName());
-        employee.setEmail(dto.getEmail());
-        employee.setMobileNumber(dto.getMobileNumber());
-        employee.setAddress(dto.getAddress());
-
-        employee.setContractType(dto.getContractType());
-        employee.setStartDate(dto.getStartDate());
-        employee.setFinishDate(dto.getFinishDate());
-        employee.setOngoing(Boolean.TRUE.equals(dto.getOngoing()));
-        employee.setWorkType(dto.getWorkType());
-        employee.setHoursPerWeek(dto.getHoursPerWeek());
-
-        return employee;
     }
 
 }

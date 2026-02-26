@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.sheezanmk.employee_creator_api.dtos.UpdateEmployeeDto;
+
 @Service
 public class EmployeeService {
     private final EmployeeRepository employeeRepository;
@@ -48,41 +50,27 @@ public class EmployeeService {
         employeeRepository.deleteById(id);
     }
 
-    public Employee updateEmployee(Long id, Employee updatedData) {
+    public Employee updateEmployee(Long id, UpdateEmployeeDto dto) {
         Employee existing = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
 
-        updatedData.setFirstName(updatedData.getFirstName().trim());
-        // if (updatedData.getMiddleName() != null)
-        // updatedData.setMiddleName(updatedData.getMiddleName().trim());
-        updatedData.setLastName(updatedData.getLastName().trim());
-        updatedData.setEmail(updatedData.getEmail().trim().toLowerCase());
-        updatedData.setMobileNumber(updatedData.getMobileNumber().trim());
-        if (updatedData.getAddress() != null)
-            updatedData.setAddress(updatedData.getAddress().trim());
+        String newEmail = dto.getEmail().trim().toLowerCase();
 
-        String newEmail = updatedData.getEmail();
         if (!existing.getEmail().equalsIgnoreCase(newEmail)
                 && employeeRepository.existsByEmailIgnoreCase(newEmail)) {
             throw new RuntimeException("Employee with this email already exists");
         }
 
-        existing.setFirstName(updatedData.getFirstName());
-        // existing.setMiddleName(updatedData.getMiddleName());
-        existing.setLastName(updatedData.getLastName());
-        existing.setEmail(updatedData.getEmail());
-        existing.setMobileNumber(updatedData.getMobileNumber());
-        existing.setAddress(updatedData.getAddress());
-
-        existing.setContractType(updatedData.getContractType());
-        existing.setStartDate(updatedData.getStartDate());
-        existing.setFinishDate(updatedData.getFinishDate());
-        existing.setOngoing(updatedData.isOngoing());
-        existing.setWorkType(updatedData.getWorkType());
-        existing.setHoursPerWeek(updatedData.getHoursPerWeek());
+        dto.setFirstName(dto.getFirstName().trim());
+        // if (dto.getMiddleName() != null)
+        // dto.setMiddleName(dto.getMiddleName().trim());
+        dto.setLastName(dto.getLastName().trim());
+        dto.setEmail(newEmail);
+        dto.setMobileNumber(dto.getMobileNumber().trim());
+        if (dto.getAddress() != null)
+            dto.setAddress(dto.getAddress().trim());
+        EmployeeMapper.applyUpdate(existing, dto);
 
         return employeeRepository.save(existing);
-
     }
-
 }
