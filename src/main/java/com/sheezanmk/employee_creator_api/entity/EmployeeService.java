@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.sheezanmk.employee_creator_api.dtos.PatchEmployeeDto;
 import com.sheezanmk.employee_creator_api.dtos.UpdateEmployeeDto;
 
 @Service
@@ -73,4 +74,34 @@ public class EmployeeService {
 
         return employeeRepository.save(existing);
     }
+
+    public Employee patchEmployee(Long id, PatchEmployeeDto dto) {
+        Employee existing = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        if (dto.getEmail() != null) {
+            String newEmail = dto.getEmail().trim().toLowerCase();
+            if (!existing.getEmail().equalsIgnoreCase(newEmail)
+                    && employeeRepository.existsByEmailIgnoreCase(newEmail)) {
+                throw new RuntimeException("Employee with this email already exists");
+            }
+            dto.setEmail(newEmail);
+        }
+
+        if (dto.getFirstName() != null)
+            dto.setFirstName(dto.getFirstName().trim());
+        // if (dto.getMiddleName() != null)
+        // dto.setMiddleName(dto.getMiddleName().trim());
+        if (dto.getLastName() != null)
+            dto.setLastName(dto.getLastName().trim());
+        if (dto.getMobileNumber() != null)
+            dto.setMobileNumber(dto.getMobileNumber().trim());
+        if (dto.getAddress() != null)
+            dto.setAddress(dto.getAddress().trim());
+
+        EmployeeMapper.applyPatch(existing, dto);
+
+        return employeeRepository.save(existing);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.sheezanmk.employee_creator_api.entity;
 
 import com.sheezanmk.employee_creator_api.dtos.CreateEmployeeDto;
 import com.sheezanmk.employee_creator_api.dtos.EmployeeResponseDto;
+import com.sheezanmk.employee_creator_api.dtos.PatchEmployeeDto;
 import com.sheezanmk.employee_creator_api.dtos.UpdateEmployeeDto;
 
 public class EmployeeMapper {
@@ -59,6 +60,34 @@ public class EmployeeMapper {
         employee.setWorkType(dto.getWorkType());
         employee.setHoursPerWeek(dto.getHoursPerWeek());
 
+    }
+
+    public static void applyPatch(Employee employee, PatchEmployeeDto dto) {
+        if (dto.getFirstName() != null)
+            employee.setFirstName(dto.getFirstName());
+        // if (dto.getMiddleName() != null)
+        // employee.setMiddleName(dto.getMiddleName());
+        if (dto.getLastName() != null)
+            employee.setLastName(dto.getLastName());
+        if (dto.getEmail() != null)
+            employee.setEmail(dto.getEmail());
+        if (dto.getMobileNumber() != null)
+            employee.setMobileNumber(dto.getMobileNumber());
+        if (dto.getAddress() != null)
+            employee.setAddress(dto.getAddress());
+
+        if (dto.getContractType() != null)
+            employee.setContractType(dto.getContractType());
+        if (dto.getStartDate() != null)
+            employee.setStartDate(dto.getStartDate());
+        if (dto.getFinishDate() != null)
+            employee.setFinishDate(dto.getFinishDate());
+        if (dto.getOngoing() != null)
+            employee.setOngoing(dto.getOngoing());
+        if (dto.getWorkType() != null)
+            employee.setWorkType(dto.getWorkType());
+        if (dto.getHoursPerWeek() != null)
+            employee.setHoursPerWeek(dto.getHoursPerWeek());
     }
 
 }

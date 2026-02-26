@@ -6,12 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sheezanmk.employee_creator_api.dtos.CreateEmployeeDto;
 import com.sheezanmk.employee_creator_api.dtos.EmployeeResponseDto;
+import com.sheezanmk.employee_creator_api.dtos.PatchEmployeeDto;
 import com.sheezanmk.employee_creator_api.dtos.UpdateEmployeeDto;
 
 import jakarta.validation.Valid;
@@ -61,6 +63,12 @@ public class EmployeeController {
             return EmployeeMapper.toDto(saved);
         }
 
+    }
+
+    @PatchMapping("/{id}")
+    public EmployeeResponseDto patchEmployee(@PathVariable Long id, @RequestBody @Valid PatchEmployeeDto body) {
+        Employee saved = employeeService.patchEmployee(id, body);
+        return EmployeeMapper.toDto(saved);
     }
 
 }
