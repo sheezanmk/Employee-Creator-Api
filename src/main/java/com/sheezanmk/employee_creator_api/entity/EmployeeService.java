@@ -3,6 +3,10 @@ package com.sheezanmk.employee_creator_api.entity;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.sheezanmk.employee_creator_api.exceptions.BadRequestException;
+import com.sheezanmk.employee_creator_api.exceptions.DuplicateResourceException;
+import com.sheezanmk.employee_creator_api.exceptions.NotFoundException;
+
 import org.springframework.stereotype.Service;
 
 import com.sheezanmk.employee_creator_api.dtos.PatchEmployeeDto;
@@ -23,7 +27,8 @@ public class EmployeeService {
 
     public Employee getEmployeeById(Long id) {
         return employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(
+                        () -> new NotFoundException("Employee not found"));
     }
 
     public Employee createEmployee(Employee employee) {
@@ -40,7 +45,7 @@ public class EmployeeService {
         }
 
         if (employeeRepository.existsByEmailIgnoreCase(employee.getEmail())) {
-            throw new RuntimeException("Employee with this email already exists");
+            throw new DuplicateResourceException("Employee with this email already exists");
         }
 
         validateEmploymentRules(
@@ -55,20 +60,20 @@ public class EmployeeService {
 
     public void deleteEmployee(Long id) {
         if (!employeeRepository.existsById(id)) {
-            throw new RuntimeException("Employee not found");
+            throw new NotFoundException("Employee not found");
         }
         employeeRepository.deleteById(id);
     }
 
     public Employee updateEmployee(Long id, UpdateEmployeeDto dto) {
         Employee existing = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new NotFoundException("Employee not found"));
 
         String newEmail = dto.getEmail().trim().toLowerCase();
 
         if (!existing.getEmail().equalsIgnoreCase(newEmail)
                 && employeeRepository.existsByEmailIgnoreCase(newEmail)) {
-            throw new RuntimeException("Employee with this email already exists");
+            throw new DuplicateResourceException("Employee with this email already exists");
         }
 
         dto.setFirstName(dto.getFirstName().trim());
@@ -93,13 +98,13 @@ public class EmployeeService {
 
     public Employee patchEmployee(Long id, PatchEmployeeDto dto) {
         Employee existing = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+                .orElseThrow(() -> new NotFoundException("Employee not found"));
 
         if (dto.getEmail() != null) {
             String newEmail = dto.getEmail().trim().toLowerCase();
             if (!existing.getEmail().equalsIgnoreCase(newEmail)
                     && employeeRepository.existsByEmailIgnoreCase(newEmail)) {
-                throw new RuntimeException("Employee with this email already exists");
+                throw new DuplicateResourceException("Employee with this email already exists");
             }
             dto.setEmail(newEmail);
         }
@@ -122,7 +127,7 @@ public class EmployeeService {
         }
 
         if (dto.getWorkType() != null && dto.getWorkType() == WorkType.PART_TIME && dto.getHoursPerWeek() == null) {
-            throw new RuntimeException("hoursPerWeek is required when setting workType to PART_TIME");
+            throw new BadRequestException("hoursPerWeek is required when setting workType to PART_TIME");
         }
 
         validateEmploymentRules(
@@ -145,25 +150,25 @@ public class EmployeeService {
         if (ongoing != null) {
             if (Boolean.TRUE.equals(ongoing)) {
                 if (finishDate != null) {
-                    throw new RuntimeException("finishDate must be null when ongoing is true");
+                    throw new BadRequestException("finishDate must be null when ongoing is true");
                 }
             } else {
                 if (finishDate == null) {
-                    throw new RuntimeException("finishDate is required when ongoing is false");
+                    throw new BadRequestException("finishDate is required when ongoing is false");
                 }
             }
         }
 
         if (startDate != null && finishDate != null) {
             if (finishDate.isBefore(startDate)) {
-                throw new RuntimeException("finishDate cannot be before startDate");
+                throw new BadRequestException("finishDate cannot be before startDate");
             }
         }
 
         if (workType != null) {
             if (workType == WorkType.PART_TIME) {
                 if (hoursPerWeek == null) {
-                    throw new RuntimeException("hoursPerWeek is required for PART_TIME employees");
+                    throw new BadRequestException("hoursPerWeek is required for PART_TIME employees");
                 }
             }
         }
