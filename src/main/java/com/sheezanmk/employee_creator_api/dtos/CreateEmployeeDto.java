@@ -18,8 +18,8 @@ public class CreateEmployeeDto {
     @Size(max = 50)
     private String firstName;
 
-    @Size(max = 50)
-    private String middleName;
+    // @Size(max = 50)
+    // private String middleName;
 
     @NotBlank
     @Size(max = 50)
@@ -66,13 +66,13 @@ public class CreateEmployeeDto {
         this.firstName = firstName;
     }
 
-    public String getMiddleName() {
-        return middleName;
-    }
+    // public String getMiddleName() {
+    // return middleName;
+    // }
 
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
+    // public void setMiddleName(String middleName) {
+    // this.middleName = middleName;
+    // }
 
     public String getLastName() {
         return lastName;
