@@ -3,6 +3,9 @@ package com.sheezanmk.employee_creator_api.entity;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.sheezanmk.employee_creator_api.exceptions.BadRequestException;
 import com.sheezanmk.employee_creator_api.exceptions.DuplicateResourceException;
 import com.sheezanmk.employee_creator_api.exceptions.NotFoundException;
@@ -15,6 +18,9 @@ import com.sheezanmk.employee_creator_api.enums.WorkType;
 
 @Service
 public class EmployeeService {
+
+    private static final Logger log = LogManager.getLogger(EmployeeService.class);
+
     private final EmployeeRepository employeeRepository;
 
     public EmployeeService(EmployeeRepository employeeRepository) {
@@ -22,16 +28,23 @@ public class EmployeeService {
     }
 
     public List<Employee> getAllEmployees() {
-        return employeeRepository.findAll();
+        List<Employee> employees = employeeRepository.findAll();
+        log.info("Fetched employees count={}", employees.size());
+        return employees;
     }
 
     public Employee getEmployeeById(Long id) {
         return employeeRepository.findById(id)
-                .orElseThrow(
-                        () -> new NotFoundException("Employee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Employee not found id={}", id);
+
+                    return new NotFoundException("Employee not found");
+                });
     }
 
     public Employee createEmployee(Employee employee) {
+
+        log.info("Creating employee email={}", employee.getEmail());
 
         employee.setFirstName(employee.getFirstName().trim());
         // if (employee.getMiddleName() != null) {
@@ -45,6 +58,7 @@ public class EmployeeService {
         }
 
         if (employeeRepository.existsByEmailIgnoreCase(employee.getEmail())) {
+            log.warn("Duplicate email attempted email={}", employee.getEmail());
             throw new DuplicateResourceException("Employee with this email already exists");
         }
 
@@ -55,24 +69,38 @@ public class EmployeeService {
                 employee.getWorkType(),
                 employee.getHoursPerWeek());
 
-        return employeeRepository.save(employee);
+        Employee saved = employeeRepository.save(employee);
+
+        log.info("Employee created id={} email={}", saved.getId(), saved.getEmail());
+
+        return saved;
     }
 
     public void deleteEmployee(Long id) {
+
+        log.info("Deleting employee id={}", id);
         if (!employeeRepository.existsById(id)) {
+            log.warn("Delete failed - employee not found id={}", id);
             throw new NotFoundException("Employee not found");
         }
         employeeRepository.deleteById(id);
+        log.info("Employee deleted id={}", id);
     }
 
     public Employee updateEmployee(Long id, UpdateEmployeeDto dto) {
+
+        log.info("Updating employee id={}", id);
         Employee existing = employeeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Employee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Update failed - employee not found id={}", id);
+                    return new NotFoundException("Employee not found");
+                });
 
         String newEmail = dto.getEmail().trim().toLowerCase();
 
         if (!existing.getEmail().equalsIgnoreCase(newEmail)
                 && employeeRepository.existsByEmailIgnoreCase(newEmail)) {
+            log.warn("Update duplicate email attempted id={} email={}", id, newEmail);
             throw new DuplicateResourceException("Employee with this email already exists");
         }
 
@@ -93,17 +121,26 @@ public class EmployeeService {
                 existing.getWorkType(),
                 existing.getHoursPerWeek());
 
-        return employeeRepository.save(existing);
+        Employee saved = employeeRepository.save(existing);
+        log.info("Employee updated id={} email={}", saved.getId(), saved.getEmail());
+        return saved;
     }
 
     public Employee patchEmployee(Long id, PatchEmployeeDto dto) {
+
+        log.info("Patching employee id={}", id);
+
         Employee existing = employeeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Employee not found"));
+                .orElseThrow(() -> {
+                    log.warn("Patch failed - employee not found id={}", id);
+                    return new NotFoundException("Employee not found");
+                });
 
         if (dto.getEmail() != null) {
             String newEmail = dto.getEmail().trim().toLowerCase();
             if (!existing.getEmail().equalsIgnoreCase(newEmail)
                     && employeeRepository.existsByEmailIgnoreCase(newEmail)) {
+                log.warn("Patch duplicate email attempted id={} email={}", id, newEmail);
                 throw new DuplicateResourceException("Employee with this email already exists");
             }
             dto.setEmail(newEmail);
@@ -127,6 +164,7 @@ public class EmployeeService {
         }
 
         if (dto.getWorkType() != null && dto.getWorkType() == WorkType.PART_TIME && dto.getHoursPerWeek() == null) {
+            log.warn("Patch rule violation id={} - PART_TIME without hoursPerWeek", id);
             throw new BadRequestException("hoursPerWeek is required when setting workType to PART_TIME");
         }
 
@@ -137,7 +175,9 @@ public class EmployeeService {
                 existing.getWorkType(),
                 existing.getHoursPerWeek());
 
-        return employeeRepository.save(existing);
+        Employee saved = employeeRepository.save(existing);
+        log.info("Employee patched id={} email={}", saved.getId(), saved.getEmail());
+        return saved;
     }
 
     private void validateEmploymentRules(
