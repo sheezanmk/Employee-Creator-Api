@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleUnexpected(Exception ex, HttpServletRequest request) {
-        // You can log ex here (later with log4j2)
+
         return buildError(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Something went wrong",
                 request.getRequestURI(),
